@@ -30,7 +30,7 @@
 
     for (const button of whisperButtons) {
       const listingId = button.closest("[data-id]")?.dataset.id;
-      const isScriptEnabled = localStorageKey.getItem('is_script_enabled') 
+      const isScriptEnabled = localStorage.getItem('is_script_enabled') 
 
       if (!button.dataset.autoClicked && listingId && !whisperedListings.has(listingId) && isScriptEnabled === 'true') {
         button.click();
