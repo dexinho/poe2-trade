@@ -5,7 +5,7 @@
   "description": "Automatically clicks Direct Whisper buttons across multiple PoE trade tabs",
   "content_scripts": [
     {
-      "matches": ["https://www.pathofexile.com/trade2/search/poe2*"],
+      "matches": ["https://www.pathofexile.com/*"],
       "js": ["app.js"]
     }
   ],

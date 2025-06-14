@@ -3,7 +3,6 @@
 
   const whisperCooldown = 3000;
   const localStorageKey = "poe_auto_whisper_last_click";
-  const whisperedListings = new Set();
 
   function getLastWhisperTime() {
     return parseInt(localStorage.getItem(localStorageKey) || "0", 10);
@@ -14,6 +13,9 @@
   }
 
   function checkAndClickButtons() {
+    const isScriptEnabled = localStorage.getItem("is_script_enabled");
+    if (isScriptEnabled !== "true") return;
+
     const now = Date.now();
     const lastWhisperTime = getLastWhisperTime();
     if (now - lastWhisperTime < whisperCooldown) {
@@ -22,6 +24,7 @@
 
     const whisperButtons = document.querySelectorAll("button.direct-btn");
     const plusSpan = document.querySelector("span.plus");
+    let maxWhisperClicks = 2;
 
     if (plusSpan) {
       const textSpan = plusSpan.nextElementSibling;
@@ -29,38 +32,23 @@
     }
 
     for (const button of whisperButtons) {
-      const listingId = button.closest("[data-id]")?.dataset.id;
-      const isScriptEnabled = localStorage.getItem('is_script_enabled') 
+      if (typeof button.dataset.clickCount !== "number")
+        button.dataset.clickCount = 1;
 
-      if (!button.dataset.autoClicked && listingId && !whisperedListings.has(listingId) && isScriptEnabled === 'true') {
-        button.click();
-        button.dataset.autoClicked = "true";
-        whisperedListings.add(listingId);
-        updateLastWhisperTime();
-        console.log(`✅ Whispered listing ${listingId}`);
-        break; 
+      if (Number(button.dataset.clickCount) === maxWhisperClicks) break;
+      if (Number(button.dataset.clickCount) < maxWhisperClicks) {
+        
+        try {
+          button.click();
+          button.dataset.clickCount++;
+          updateLastWhisperTime();
+          break;
+        } catch (err) {
+          console.log(err)
+        }
       }
     }
   }
 
-  const observer = new MutationObserver(() => {
-    checkAndClickButtons();
-  });
-
-  function startObserver() {
-    const container = document.querySelector("#trade");
-    if (container) {
-      observer.observe(container, {
-        childList: true,
-        subtree: true,
-      });
-      console.log("✅ Observer is watching #trade...");
-    } else {
-      console.error("❌ Could not find the #trade container");
-      setTimeout(startObserver, 2000);
-    }
-  }
-
-  startObserver();
-  setInterval(checkAndClickButtons, 1000);
+  setInterval(checkAndClickButtons, 2000);
 })();
